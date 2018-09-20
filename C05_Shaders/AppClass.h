@@ -31,7 +31,12 @@ class AppClass
 	
 	glm::vec3 m_v3Color = glm::vec3(-1.0f); //Color of shape
 
+	typedef glm::vec3 vector3;
+	typedef glm::mat4x4 matrix4;
+
 	bool m_bRunning = true; //Running Flag
+	matrix4 m_m4ToWorld;
+	vector3 v3Position;
 		
 public:
 	/*
