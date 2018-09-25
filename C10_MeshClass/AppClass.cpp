@@ -25,8 +25,17 @@ void Application::Display(void)
 	// Clear the screen
 	ClearScreen();
 
-	m_pMesh->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), ToMatrix4(m_qArcBall));
-	m_pMesh1->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), glm::translate(vector3( 3.0f, 0.0f, 0.0f)));
+	static float fDisplacement = 0.0f;
+	fDisplacement += .1f;
+	matrix4 m4Space = glm::translate(vector3(fDisplacement, 1.0f, 0.0f));
+	matrix4 m4Translation1 = m4Space * glm::translate(vector3(1.0f, 1.0f, 1.0f));
+	//matrix4 m4Scale = glm::scale(vector3(3.0f, 3.0f, 3.0f));
+	//matrix4 m4Compound = m4Translation1 * ToMatrix4(m_qArcBall);
+
+	matrix4 m4Translation2 = m4Space * glm::translate(vector3(3.0f, 3.0f, 3.0f));
+
+	m_pMesh->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), m4Translation1);
+	m_pMesh1->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), m4Translation2);
 		
 	// draw a skybox
 	m_pMeshMngr->AddSkyboxToRenderList();
