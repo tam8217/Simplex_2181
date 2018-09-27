@@ -105,7 +105,7 @@ void MyMesh::CompileOpenGL3X(void)
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);//Bind the VBO
 	glBufferData(GL_ARRAY_BUFFER, m_uVertexCount * 2 * sizeof(vector3), &m_lVertex[0], GL_STATIC_DRAW);//Generate space for the VBO
 
-	// Position attribute
+																									   // Position attribute
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(vector3), (GLvoid*)0);
 
@@ -121,7 +121,7 @@ void MyMesh::Render(matrix4 a_mProjection, matrix4 a_mView, matrix4 a_mModel)
 {
 	// Use the buffer and shader
 	GLuint nShader = m_pShaderMngr->GetShaderID("Basic");
-	glUseProgram(nShader); 
+	glUseProgram(nShader);
 
 	//Bind the VAO of this object
 	glBindVertexArray(m_VAO);
@@ -133,11 +133,11 @@ void MyMesh::Render(matrix4 a_mProjection, matrix4 a_mView, matrix4 a_mModel)
 	//Final Projection of the Camera
 	matrix4 m4MVP = a_mProjection * a_mView * a_mModel;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(m4MVP));
-	
+
 	//Solid
 	glUniform3f(wire, -1.0f, -1.0f, -1.0f);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawArrays(GL_TRIANGLES, 0, m_uVertexCount);  
+	glDrawArrays(GL_TRIANGLES, 0, m_uVertexCount);
 
 	//Wire
 	glUniform3f(wire, 1.0f, 0.0f, 1.0f);
@@ -153,8 +153,8 @@ void MyMesh::AddTri(vector3 a_vBottomLeft, vector3 a_vBottomRight, vector3 a_vTo
 {
 	//C
 	//| \
-	//A--B
-	//This will make the triangle A->B->C 
+		//A--B
+//This will make the triangle A->B->C 
 	AddVertexPosition(a_vBottomLeft);
 	AddVertexPosition(a_vBottomRight);
 	AddVertexPosition(a_vTopLeft);
@@ -186,17 +186,17 @@ void MyMesh::GenerateCube(float a_fSize, vector3 a_v3Color)
 	//|  |
 	//0--1
 
-	vector3 point0(-fValue,-fValue, fValue); //0
-	vector3 point1( fValue,-fValue, fValue); //1
-	vector3 point2( fValue, fValue, fValue); //2
+	vector3 point0(-fValue, -fValue, fValue); //0
+	vector3 point1(fValue, -fValue, fValue); //1
+	vector3 point2(fValue, fValue, fValue); //2
 	vector3 point3(-fValue, fValue, fValue); //3
 
-	vector3 point4(-fValue,-fValue,-fValue); //4
-	vector3 point5( fValue,-fValue,-fValue); //5
-	vector3 point6( fValue, fValue,-fValue); //6
-	vector3 point7(-fValue, fValue,-fValue); //7
+	vector3 point4(-fValue, -fValue, -fValue); //4
+	vector3 point5(fValue, -fValue, -fValue); //5
+	vector3 point6(fValue, fValue, -fValue); //6
+	vector3 point7(-fValue, fValue, -fValue); //7
 
-	//F
+											  //F
 	AddQuad(point0, point1, point3, point2);
 
 	//B
@@ -237,7 +237,7 @@ void MyMesh::GenerateCuboid(vector3 a_v3Dimensions, vector3 a_v3Color)
 	vector3 point6(v3Value.x, v3Value.y, -v3Value.z); //6
 	vector3 point7(-v3Value.x, v3Value.y, -v3Value.z); //7
 
-	//F
+													   //F
 	AddQuad(point0, point1, point3, point2);
 
 	//B
@@ -275,29 +275,12 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Release();
 	Init();
 
-	//Creating the center of the circle
-	vector3 vec1 = vector3(0.0f, 0.0f, -a_fHeight);
-	vector3 tip = vector3(0.0f, 0.0f, a_fHeight);
-
-	//Calculating the degrees, then converting to radians, needed for each subdivision
-	float degs = 360 / a_nSubdivisions;
-	float rads = (degs * PI) / 180;
-
-	//Creating the Cone
-	for (size_t i = 0; i < a_nSubdivisions; i++)
-	{
-		//Creating two points to form the triangle
-		vector3 vec2 = vector3(a_fRadius * cos(rads *i), a_fRadius *sin(rads *i), -a_fHeight);
-		vector3 vec3 = vector3(a_fRadius * cos(rads *(i + 1)), a_fRadius *sin(rads *(i + 1)), -a_fHeight); 
-
-
-		//Creating the triangle, keeping one point at the origin
-		AddTri(vec1, vec3, vec2);
-
-		//Making another triangle which connects to the tip of the cone
-		AddTri(vec2, vec3, tip);
-	}
-
+	// Replace this with your code
+	Mesh* pMesh = new Mesh();
+	pMesh->GenerateCone(a_fRadius, a_fHeight, a_nSubdivisions, a_v3Color);
+	m_lVertexPos = pMesh->GetVertexList();
+	m_uVertexCount = m_lVertexPos.size();
+	SafeDelete(pMesh);
 	// -------------------------------
 
 	// Adding information about color
@@ -320,39 +303,12 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Release();
 	Init();
 
-	//Getting the center for both circles
-	float midHeight = .5 * a_fHeight;
-	vector3 base1 = vector3(0.0f, 0.0f, midHeight);
-	vector3 base2 = vector3(0.0f, 0.0f,-midHeight);
-
-	
-
-	//Calculating the degrees, then converting to radians, needed for each subdivision
-	float degs = 360 / a_nSubdivisions;
-	float rads = (degs * PI) / 180;
-
-	//Creating the triangles
-	for (size_t i = 0; i < a_nSubdivisions; i++)
-	{
-		//Creating two points to form the triangle
-		vector3 vec2 = vector3(a_fRadius * cos(rads *i), a_fRadius *sin(rads *i), midHeight);
-		vector3 vec3 = vector3(a_fRadius * cos(rads *(i + 1)), a_fRadius *sin(rads *(i + 1)), midHeight); 
-
-		vector3 vec4 = vector3(a_fRadius * cos(rads *i), a_fRadius *sin(rads *i), -midHeight);
-		vector3 vec5 = vector3(a_fRadius * cos(rads *(i + 1)), a_fRadius *sin(rads *(i + 1)), -midHeight); 
-
-
-		//Creating the triangle for the top circle
-		AddTri(base1, vec2, vec3);
-
-		//Creating the triangle for the bottom circle
-		AddTri(base2, vec5, vec4);
-
-
-		//Drawing the sides of the cylinder, connecting the triangles/circles
-		AddQuad(vec3, vec2, vec5, vec4);
-	}
-
+	// Replace this with your code
+	Mesh* pMesh = new Mesh();
+	pMesh->GenerateCylinder(a_fRadius, a_fHeight, a_nSubdivisions, a_v3Color);
+	m_lVertexPos = pMesh->GetVertexList();
+	m_uVertexCount = m_lVertexPos.size();
+	SafeDelete(pMesh);
 	// -------------------------------
 
 	// Adding information about color
@@ -381,43 +337,12 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Release();
 	Init();
 
-	//Finding the height to have both bases at 
-	float midHeight = .5 * a_fHeight;
-
-	//Getting the center for both circles
-	vector3 base1 = vector3(0.0f, 0.0f, midHeight);
-	vector3 base2 = vector3(0.0f, 0.0f, -midHeight);
-
-	//Calculating the degrees, then converting to radians, needed for each subdivision
-	float degs = 360 / a_nSubdivisions;
-	float rads = (degs * PI) / 180;
-
-	//Creating the tube
-	for (size_t i = 0; i < a_nSubdivisions; i++)
-	{
-		//Calculating the inner points on the top and bottom
-		vector3 topInner1 = vector3(a_fInnerRadius * cos(rads *i), a_fInnerRadius *sin(rads *i), midHeight);
-		vector3 topInner2 = vector3(a_fInnerRadius * cos(rads *(i + 1)), a_fInnerRadius *sin(rads *(i + 1)), midHeight); 
-
-		vector3 bottomInner1 = vector3(a_fInnerRadius * cos(rads *i), a_fInnerRadius *sin(rads *i), -midHeight);
-		vector3 bottomInner2 = vector3(a_fInnerRadius * cos(rads *(i + 1)), a_fInnerRadius *sin(rads *(i + 1)), -midHeight); 
-
-		//Calculating the outer points on the top and bottom
-		vector3 topOuter1 = vector3(a_fOuterRadius * cos(rads *i), a_fOuterRadius *sin(rads *i), midHeight);
-		vector3 topOuter2 = vector3(a_fOuterRadius * cos(rads *(i + 1)), a_fOuterRadius *sin(rads *(i + 1)), midHeight); 
-
-		vector3 bottomOuter1 = vector3(a_fOuterRadius * cos(rads *i), a_fOuterRadius *sin(rads *i), -midHeight);
-		vector3 bottomOuter2 = vector3(a_fOuterRadius * cos(rads *(i + 1)), a_fOuterRadius *sin(rads *(i + 1)), -midHeight); 
-
-		//Drawing quads to create the rings on both sides
-		AddQuad(topInner2, topInner1, topOuter2, topOuter1);
-		AddQuad(bottomInner1, bottomInner2, bottomOuter1, bottomOuter2);
-
-		//Drawing quads to connect the rings
-		AddQuad(topInner1, topInner2, bottomInner1, bottomInner2);
-		AddQuad(topOuter2, topOuter1, bottomOuter2, bottomOuter1);
-	}
-	
+	// Replace this with your code
+	Mesh* pMesh = new Mesh();
+	pMesh->GenerateTube(a_fOuterRadius, a_fInnerRadius, a_fHeight, a_nSubdivisions, a_v3Color);
+	m_lVertexPos = pMesh->GetVertexList();
+	m_uVertexCount = m_lVertexPos.size();
+	SafeDelete(pMesh);
 	// -------------------------------
 
 	// Adding information about color
@@ -449,11 +374,11 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	//Calculating the degrees, then converting to radians, needed for each subdivision
-	//float degs = 360 / a_nSubdivisionsA;
-	//float rads = (degs * PI) / 180;
-
+	Mesh* pMesh = new Mesh();
+	pMesh->GenerateTorus(a_fOuterRadius, a_fInnerRadius, a_nSubdivisionsA, a_nSubdivisionsB, a_v3Color);
+	m_lVertexPos = pMesh->GetVertexList();
+	m_uVertexCount = m_lVertexPos.size();
+	SafeDelete(pMesh);
 	// -------------------------------
 
 	// Adding information about color
@@ -477,52 +402,14 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Release();
 	Init();
 
-	//Vectors to store the height and radius for each part of the sphere
-	std::vector<float> heightsFirst = std::vector<float>();
-	std::vector<float> radiiFirst = std::vector<float>();
-	std::vector<float> heightsSecond = std::vector<float>();
-	std::vector<float> radiiSecond = std::vector<float>();
+	// Replace this with your code
+	Mesh* pMesh = new Mesh();
+	pMesh->GenerateSphere(a_fRadius, a_nSubdivisions, a_v3Color);
+	m_lVertexPos = pMesh->GetVertexList();
+	m_uVertexCount = m_lVertexPos.size();
+	SafeDelete(pMesh);
+	// -------------------------------
 
-	int totalCircPoints = 2+(a_nSubdivisions * 2); //This accounts for the two poles, and the mirroring of the points in the circle
-	//Without the 2 points for the pole, the sphere has a flat top and bottom, so it is necessary to have the extra part of the sphere
-	
-	//Calculating the divisions in the sphere based off the new number of points
-	float degs = 360 / totalCircPoints;
-	float rads = (degs * PI) / 180;	
-
-	//Calculating a non-drawn circle to extrapolate height and radius values for the sphere
-	for (size_t i = 0; i < totalCircPoints; i++)
-	{
-		//Circle drawing as done before
-		vector3 vec2 = vector3(a_fRadius * cos(rads *i), a_fRadius *sin(rads *i), 0);
-		vector3 vec3 = vector3(a_fRadius * cos(rads *(i + 1)), a_fRadius *sin(rads *(i + 1)), 0);
-
-		//Saving values for use later
-		radiiFirst.push_back(vec2.x);
-		radiiSecond.push_back(vec3.x);
-
-		heightsFirst.push_back(vec2.y);
-		heightsSecond.push_back(vec3.y);
-	}
-
-	//Drawing the sphere
-	for (size_t i = 0; i < totalCircPoints; i++)
-	{
-		//Drawing each layer individually
-		for (size_t j = 0; j < totalCircPoints; j++)
-		{
-			//Calculating the bottom set of points in the layer
-			vector3 bottom1 = vector3(radiiFirst[i] * cos(rads *j), radiiFirst[i] *sin(rads *j), heightsFirst[i]);
-			vector3 bottom2 = vector3(radiiFirst[i] * cos(rads *(j + 1)), radiiFirst[i] * sin(rads *(j + 1)), heightsFirst[i]);
-			
-			//Calculating the top set of points in the layer, becomes the bottom set in the next iteration
-			vector3 top1 = vector3(radiiSecond[i] * cos(rads *j), radiiSecond[i] * sin(rads *j), heightsSecond[i]);
-			vector3 top2 = vector3(radiiSecond[i] * cos(rads *(j + 1)), radiiSecond[i] *sin(rads *(j + 1)), heightsSecond[i]);
-
-			//Drawing the points
-			AddQuad(bottom1, bottom2, top1, top2);
-		}
-	}
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
