@@ -449,10 +449,38 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	//Calculating the degrees, then converting to radians, needed for each subdivision
-	//float degs = 360 / a_nSubdivisionsA;
-	//float rads = (degs * PI) / 180;
+	//GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+
+	float midRadius = a_fOuterRadius - a_fInnerRadius;
+
+	float degs = 360 / a_nSubdivisionsA;
+	float radsInner = (degs * PI) / 180;
+
+	degs = 360 / a_nSubdivisionsB;
+	float radsSub = (degs * PI) / 180;
+
+	float combRadius = a_fInnerRadius + midRadius;
+	vector3 center = vector3(0, 0, 0);
+	for (size_t i = 0; i < a_nSubdivisionsA; i++)
+	{
+		vector3 vec1 = vector3(combRadius * cos(radsInner *i), combRadius *sin(radsInner *i), 0);
+		vector3 vec2 = vector3(combRadius * cos(radsInner *(i + 1)), combRadius *sin(radsInner *(i + 1)), 0);
+
+
+		AddTri(center, vec1, vec2);
+		for (size_t j = 0; j < a_nSubdivisionsB; j++)
+		{
+			vector3 vec4 = vector3(vec2.x, 0, 0);
+			vector3 left1 = vector3(vec1.y + combRadius, midRadius * cos(radsSub *j),midRadius *sin(radsSub *j));
+			vector3 left2 = vector3(vec1.y + combRadius, midRadius * cos(radsSub *(j + 1)), midRadius *sin(radsSub *(j + 1)));
+
+			vector3 right1 = vector3(vec2.y + combRadius, midRadius * cos(radsSub *j), midRadius *sin(radsSub *j));
+			vector3 right2 = vector3(vec2.y + combRadius, midRadius * cos(radsSub *(j + 1)), midRadius *sin(radsSub *(j + 1)));
+
+			AddTri(vec4, vec1, vec2);
+			//AddQuad(left1, left2, right1, right2);
+		}
+	}
 
 	// -------------------------------
 

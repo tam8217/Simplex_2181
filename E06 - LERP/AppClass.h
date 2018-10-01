@@ -15,6 +15,10 @@ class Application
 	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
 	std::vector<vector3> m_stopsList;
 	Simplex::Model* m_pModel = nullptr;
+	
+	//Initializing the index to start lerping from
+	int startIndex = 0;
+	int nextIndex = 1;
 private:
 	static ImGuiObject gui; //GUI object
 	

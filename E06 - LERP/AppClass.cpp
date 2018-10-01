@@ -26,6 +26,7 @@ void Application::InitVariables(void)
 	m_stopsList.push_back(vector3(5.0f, 2.0f, -5.0f));
 
 	m_stopsList.push_back(vector3(1.0f, 3.0f, -5.0f));
+
 }
 void Application::Update(void)
 {
@@ -51,15 +52,36 @@ void Application::Display(void)
 	static uint uClock = m_pSystem->GenClock(); //generate a new clock for that timer
 	fTimer += m_pSystem->GetDeltaTime(uClock); //get the delta time for that timer
 
+	//Calculates the percent through lerping
+	static float percent = 0;
+
 	//calculate the current position
 	vector3 v3CurrentPos;
-	
-
-
-
 
 	//your code goes here
-	v3CurrentPos = vector3(0.0f, 0.0f, 0.0f);
+	//If the lerp is 100% done, move onto the next stop, and reset the percentage
+	if (percent >= 1.0f)
+	{
+		//Resetting percentage
+		percent = 0.0f;
+		
+		//Setting the new start to be the previous end point
+		startIndex = nextIndex;
+
+		//Going to the next stop
+		nextIndex++;
+
+		//If at the end of the stops list, go back to the beginning
+		if (nextIndex >= m_stopsList.size())
+		{
+			nextIndex = 0;
+		}
+	}
+	//Increasing the amount completed of the lerp
+	percent += .01f;
+	
+	//Moving between the current stop and the next one
+	v3CurrentPos = glm::lerp(m_stopsList[startIndex], m_stopsList[nextIndex], percent);
 	//-------------------
 	
 
