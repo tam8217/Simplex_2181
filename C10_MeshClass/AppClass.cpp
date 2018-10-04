@@ -1,9 +1,10 @@
 #include "AppClass.h"
 void Application::InitVariables(void)
 {
+	m_pCameraMngr->SetPositionTargetAndUpward(AXIS_Z * 5, ZERO_V3, AXIS_Y);
 	//Make MyMesh object
 	m_pMesh = new MyMesh();
-	m_pMesh->GenerateCube(2.0f, C_BROWN);
+	m_pMesh->GenerateCone(1.0f,2.0f,3, C_RED);
 
 	//Make MyMesh object
 	m_pMesh1 = new MyMesh();
@@ -24,53 +25,59 @@ void Application::Display(void)
 {
 	// Clear the screen
 	ClearScreen();
+	static DWORD DStartingTime = GetTickCount();
+	DWORD DCurrentTime = GetTickCount();
+	DWORD DDelta = DCurrentTime - DStartingTime;
+	float fTimer = static_cast<float>(DDelta / 1000.0f);
+	std::cout << fTimer <<std::endl;
 
-	/*
-	static float fDisplacement = 0.0f;
-	fDisplacement += .1f;
-	matrix4 m4Space = glm::translate(vector3(fDisplacement, 1.0f, 0.0f));
-	matrix4 m4Translation1 = m4Space * glm::translate(vector3(1.0f, 1.0f, 1.0f));
-	//matrix4 m4Scale = glm::scale(vector3(3.0f, 3.0f, 3.0f));
-	//matrix4 m4Compound = m4Translation1 * ToMatrix4(m_qArcBall);
-	*/
-	static DWORD startTime = GetTickCount();
+	float fTotalTime = 5.5f;
 
-	DWORD curTime = GetTickCount();
+	float fPercent = MapValue(fTimer, 0.0f, fTotalTime, 0.0f, 1.0f);
 
-	DWORD deltTime = curTime - startTime;
+	static vector3 v3InitialPoint(0.0f, 0.0f, 0.0f);
+	static vector3 v3EndPoint(5.0f, 0.0f, 0.0f);
 
-	float timeSeconds = static_cast<float>(deltTime / 1000.0f);
-	float totalTime = 5.0f;
-	float fPercent = MapValue(timeSeconds, 0.0f, totalTime, 0.0f, 1.0f);
-	static vector3 v3InitialPoint(0, 0, 0);
-	static vector3 v3EndPoint(5, 0, 0);
+	static float fStart = 0.0f;
+	static float fEnd = 180.0f;
 
-	
+	float fCurrent = glm::lerp(fStart, fEnd, fPercent);
 	vector3 v3Position = glm::lerp(v3InitialPoint, v3EndPoint, fPercent);
-	matrix4 m4Rotation = glm::rotate(IDENTITY_M4, glm::radians(90.0f), AXIS_Z);
-	//matrix4 m4Position = glm::translate(identtyM4, v3Position);
+
+	matrix4 m4Rotation = glm::rotate(IDENTITY_M4, glm::radians(fCurrent), AXIS_Z);
+	//matrix4 m4Position = glm::translate(m4Rotation, v3EndPoint);
 	
-	//std::cout << startTime << " " << curTime  << " " << deltTime << " " << timeSeconds <<std::endl;
-	//matrix4 m4Translation2 = m4Space * glm::translate(vector3(3.0f, 3.0f, 3.0f));
+	//m4Position = glm::translate(vector3(0.0f)); //Ignoring anything that happened above
 
-	m_pMesh->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), m4Rotation);
+	//New transform matrix
+	matrix4 m4RotX = glm::rotate(IDENTITY_M4, glm::radians(v3Angles.x), AXIS_X);
+	matrix4 m4RotY = glm::rotate(IDENTITY_M4, glm::radians(v3Angles.y), AXIS_Y);
+	matrix4 m4RotZ = glm::rotate(IDENTITY_M4, glm::radians(v3Angles.z), AXIS_Z);
 
-	
 
 
-	
-	if (fPercent >= 1.0f)
+	matrix4 m4Transform = m4RotX * m4RotY * m4RotZ;
+	glm::quat qOne;
+	quaternion qTwo = glm::angleAxis(glm::radians(45.0f), AXIS_Z);
+	static quaternion q3;
+	q3 = qOne * qTwo;
+	//Render the new position
+	//m_pMesh->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), m4Transform);
+	m_pMesh->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), ToMatrix4(q3));
+
+	//Change the axis of rotation
+	//v3Angles = vector3(fTimer * 45.0f);
+	/*if (fPercent >= 1.0f)
 	{
-		//fPercent = 0.0f;
-		std::swap(v3InitialPoint, v3EndPoint);
-		startTime = GetTickCount();
+		DStartingTime = GetTickCount();
+		//std::swap(v3InitialPoint, v3EndPoint);
+		std::swap(fStart, fEnd);
+		//fPercent = 0.00f;
 	}
-	else
-	{
-		//fPercent += .01f;
-		//fPercent += timeSeconds / totalTime;
-	}
-	//m_pMesh1->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), m4Translation2);
+	fPercent += 0.01f;
+	*/
+
+	//m_pMesh1->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), glm::translate(vector3( 3.0f, 0.0f, 0.0f)));
 		
 	// draw a skybox
 	m_pMeshMngr->AddSkyboxToRenderList();
