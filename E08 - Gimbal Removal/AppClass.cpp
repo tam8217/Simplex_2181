@@ -22,16 +22,29 @@ void Application::Display(void)
 	// Clear the screen
 	ClearScreen();
 
+	//m_qOrientation = vector3(0, 0, 0);
 	matrix4 m4View = m_pCameraMngr->GetViewMatrix();
 	matrix4 m4Projection = m_pCameraMngr->GetProjectionMatrix();
 
 	m_m4Model = glm::rotate(IDENTITY_M4, glm::radians(m_v3Rotation.x), vector3(1.0f, 0.0f, 0.0f));
 	m_m4Model = glm::rotate(m_m4Model, glm::radians(m_v3Rotation.y), vector3(0.0f, 1.0f, 0.0f));
 	m_m4Model = glm::rotate(m_m4Model, glm::radians(m_v3Rotation.z), vector3(0.0f, 0.0f, 1.0f));
-	m_pMesh->Render(m4Projection, m4View, ToMatrix4(m_m4Model));
+	//m_pMesh->Render(m4Projection, m4View, ToMatrix4(m_m4Model));
 
-	//m_qOrientation = m_qOrientation * glm::angleAxis(glm::radians(1.0f), vector3(1.0f));
-	//m_pMesh->Render(m4Projection, m4View, ToMatrix4(m_qOrientation));
+	//Normalizing the rotation if it is not neutral
+	if (m_v3Rotation.x != 0 && m_v3Rotation.y != 0 && m_v3Rotation.z != 0)
+	{
+		m_v3Rotation = glm::normalize(m_v3Rotation);
+	}
+	
+	//Changing the orientation based on the rotation
+	m_qOrientation =  m_qOrientation * glm::angleAxis(glm::radians(1.0f), m_v3Rotation);
+
+	//Resetting the rotation value every frame so it does not get too large
+	m_v3Rotation = vector3(0.0f);
+
+
+	m_pMesh->Render(m4Projection, m4View, ToMatrix4(m_qOrientation));
 	
 	// draw a skybox
 	m_pMeshMngr->AddSkyboxToRenderList();

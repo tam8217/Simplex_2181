@@ -57,10 +57,13 @@ void Application::Display(void)
 
 
 	matrix4 m4Transform = m4RotX * m4RotY * m4RotZ;
-	glm::quat qOne;
-	quaternion qTwo = glm::angleAxis(glm::radians(45.0f), AXIS_Z);
+	glm::quat q1;
+	quaternion q2 = glm::angleAxis(glm::radians(1.0f), AXIS_Z);
+	quaternion q4 = glm::angleAxis(glm::radians(1.0f), AXIS_X);
+	quaternion q5 = glm::angleAxis(glm::radians(1.0f), AXIS_Y);
+
 	static quaternion q3;
-	q3 = qOne * qTwo;
+	q3 = q3 * q2 * q4 * q5;
 	//Render the new position
 	//m_pMesh->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), m4Transform);
 	m_pMesh->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), ToMatrix4(q3));
