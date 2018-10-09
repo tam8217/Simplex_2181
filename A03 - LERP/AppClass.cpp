@@ -24,6 +24,9 @@ void Application::InitVariables(void)
 
 	float fSize = 1.0f; //initial size of orbits
 
+	//Storing the space between the inner and outer radii
+	float radius = .95f;
+
 	//creating a color using the spectrum 
 	uint uColor = 650; //650 is Red
 	//prevent division by 0
@@ -36,9 +39,34 @@ void Application::InitVariables(void)
 	{
 		vector3 v3Color = WaveLengthToRGB(uColor); //calculate color based on wavelength
 		m_shapeList.push_back(m_pMeshMngr->GenerateTorus(fSize, fSize - 0.1f, 3, i, v3Color)); //generate a custom torus and add it to the meshmanager
+
+		//Creating a vector to hold the stops
+		std::vector<vector3> stopList; 
+
+		//Looping through to add the stops
+		for (size_t j = 0; j < i; j++)
+		{
+			//Getting the number of radians dividing this specific taurus
+			float rads = (2 * PI) / (float)i;
+
+			//Generating a point from the center on the taurus
+			vector3 point = vector3(radius * cos(rads * j), radius * sin(rads * j), 0);
+
+			//Adding to the initial vector
+			stopList.push_back(point);
+		}
+
+		//Adding to the overall list of stops
+		allStopList.push_back(stopList);
+
 		fSize += 0.5f; //increment the size for the next orbit
+
+		//Increasing the raidius
+		radius += .5f;
+
 		uColor -= static_cast<uint>(decrements); //decrease the wavelength
 	}
+	std::cout << allStopList.size() << std::endl;
 }
 void Application::Update(void)
 {
@@ -62,19 +90,45 @@ void Application::Display(void)
 	/*
 		The following offset will orient the orbits as in the demo, start without it to make your life easier.
 	*/
-	//m4Offset = glm::rotate(IDENTITY_M4, 1.5708f, AXIS_Z);
+	m4Offset = glm::rotate(IDENTITY_M4, 1.5708f, AXIS_Z);
+
+	//Keeping track of how many cycles have been made
+	static int curIteration = 0;
+
+	//Initializing a percentage for lerping
+	static float percent = 0.0f;
 
 	// draw a shapes
 	for (uint i = 0; i < m_uOrbits; ++i)
 	{
 		m_pMeshMngr->AddMeshToRenderList(m_shapeList[i], glm::rotate(m4Offset, 1.5708f, AXIS_X));
 
-		//calculate the current position
-		vector3 v3CurrentPos = ZERO_V3;
-		matrix4 m4Model = glm::translate(m4Offset, v3CurrentPos);
+		//Looping to move the sphere for each orbit
+		for (size_t j = 0; j < m_uOrbits; j++)
+		{
+			//Lerp between the current stop and the next one, taking into account if it goes back to the original point
+			vector3 v3CurrentPos = glm::lerp(allStopList[j][curIteration % allStopList[j].size()], allStopList[j][(curIteration +1) % allStopList[j].size()], percent);
 
-		//draw spheres
-		m_pMeshMngr->AddSphereToRenderList(m4Model * glm::scale(vector3(0.1)), C_WHITE);
+			//Accounting for the offset
+			matrix4 m4Model = glm::translate(m4Offset, v3CurrentPos);
+
+			//draw spheres
+			m_pMeshMngr->AddSphereToRenderList(m4Model * glm::scale(vector3(0.1)), C_WHITE);
+
+		}
+
+		//Iterating the percent to progress the lerping
+		percent += .001f;
+		
+		//If a cycle has been completed, reset the percent
+		if (percent >= 1.0f)
+		{
+			//Resetting the percent
+			percent = 0.0f;
+
+			//Moving to the next cycle
+			curIteration++;
+		}
 	}
 
 	//render list call
