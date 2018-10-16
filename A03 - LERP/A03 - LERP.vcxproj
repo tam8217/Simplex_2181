@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{63E8C63D-1CCD-43F2-9E0F-1510677DE856}</ProjectGuid>
+    <ProjectGuid>{892A0BEF-3A87-477F-B1CC-3BF41AAF6C8F}</ProjectGuid>
     <RootNamespace>A03 - LERP</RootNamespace>
     <ProjectName>A03 - LERP</ProjectName>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
