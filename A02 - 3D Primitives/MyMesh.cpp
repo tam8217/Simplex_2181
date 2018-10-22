@@ -276,8 +276,8 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Init();
 
 	//Creating the center of the circle
-	vector3 vec1 = vector3(0.0f, 0.0f, -a_fHeight);
-	vector3 tip = vector3(0.0f, 0.0f, a_fHeight);
+	vector3 vec1 = vector3(0.0f, 0.0f, .5 * -a_fHeight);
+	vector3 tip = vector3(0.0f, 0.0f, .5 * a_fHeight);
 
 	//Calculating the degrees, then converting to radians, needed for each subdivision
 	float degs = 360 / a_nSubdivisions;

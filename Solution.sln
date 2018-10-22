@@ -117,6 +117,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "A03 - LERP", "\\banner.main
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "A03 - LERP", "A03 - LERP\A03 - LERP.vcxproj", "{892A0BEF-3A87-477F-B1CC-3BF41AAF6C8F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ex01H", "Ex01H\Ex01H.vcxproj", "{0D1CB2F5-16C0-4D9A-8ACD-C5E3E17FC8B4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -313,6 +315,10 @@ Global
 		{892A0BEF-3A87-477F-B1CC-3BF41AAF6C8F}.Debug|x86.Build.0 = Debug|Win32
 		{892A0BEF-3A87-477F-B1CC-3BF41AAF6C8F}.Release|x86.ActiveCfg = Release|Win32
 		{892A0BEF-3A87-477F-B1CC-3BF41AAF6C8F}.Release|x86.Build.0 = Release|Win32
+		{0D1CB2F5-16C0-4D9A-8ACD-C5E3E17FC8B4}.Debug|x86.ActiveCfg = Debug|Win32
+		{0D1CB2F5-16C0-4D9A-8ACD-C5E3E17FC8B4}.Debug|x86.Build.0 = Debug|Win32
+		{0D1CB2F5-16C0-4D9A-8ACD-C5E3E17FC8B4}.Release|x86.ActiveCfg = Release|Win32
+		{0D1CB2F5-16C0-4D9A-8ACD-C5E3E17FC8B4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

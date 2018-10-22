@@ -3,7 +3,7 @@ using namespace Simplex;
 void Application::InitVariables(void)
 {
 	//Change this to your name and email
-	m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	m_sProgrammer = "Tristan Marshall - tam8217@g.rit.edu";
 
 	//Set the position and target of the camera
 	//(I'm at [0,0,10], looking at [0,0,0] and up is the positive Y axis)
@@ -45,6 +45,10 @@ void Application::Display(void)
 	//draw a skybox
 	m_pMeshMngr->AddSkyboxToRenderList();
 
+	vector3 pos;
+	vector3 targ;
+	vector3 up;
+
 	//calculate view and projection
 	switch (m_uProjection)
 	{
@@ -53,22 +57,67 @@ void Application::Display(void)
 		m_pCamera->ResetCamera();
 		break;
 	case 2:
+
 		m_pCamera->ResetCamera();
+
+		//Making the camera Orthographic
+		m_pCamera->SetPerspective(false);
 		break;
 	case 3:
 		m_pCamera->ResetCamera();
+
+		//Sifting the camera to look at the side
+		pos = vector3(0, 30.0f, 0.0f);
+		targ = vector3(0.0f, 0.0f, 1.0f);
+		up = vector3(0, -1.0f, 0.0f);
+
+		//Setting the new location of the camera
+		m_pCamera->SetPositionTargetAndUpward(pos, targ, up);
 		break;
 	case 4:
 		m_pCamera->ResetCamera();
+		
+		//Moving the camera to the other side 
+		pos = vector3(0, 0, -15.0f);
+		targ = vector3(0.0f, 0.0f, 0.0f);
+		up = vector3(0.0f, 1.0f, 0);
+
+		m_pCamera->SetPositionTargetAndUpward(pos, targ, up);
 		break;
 	case 5:
+		//Scene 5
 		m_pCamera->ResetCamera();
+
+		//Moving the camera to the other side
+		pos = vector3(0, 0, -15.0f);
+		targ = vector3(0.0f, 0.0f, 0.0f);
+		up = vector3(0.0f, 1.0f, 0);
+
+		//Not showing objects closer to the camera
+		m_pCamera->SetNearFar(vector2(6.0f, 1000.0f));
+		
+		m_pCamera->SetPositionTargetAndUpward(pos, targ, up);
 		break;
 	case 6:
+		//Scene 6
 		m_pCamera->ResetCamera();
+
+		//Moving the camera to the other side
+		pos = vector3(0, 0, -15.0f);
+		targ = vector3(0.0f, 0.0f, 0.0f);
+		up = vector3(0.0f, 1.0f, 0);
+
+		//Not showing objects further from the camera
+		m_pCamera->SetNearFar(vector2(.001f, 10.0f));
+
+		m_pCamera->SetPositionTargetAndUpward(pos, targ, up);
+		
 		break;
 	case 7:
 		m_pCamera->ResetCamera();
+		//Flipping the camera
+		up = vector3(0, -1.0f, 0);
+		m_pCamera->SetUp(up);
 		break;
 	}
 
