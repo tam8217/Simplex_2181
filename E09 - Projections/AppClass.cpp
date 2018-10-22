@@ -67,9 +67,9 @@ void Application::Display(void)
 		m_pCamera->ResetCamera();
 
 		//Sifting the camera to look at the side
-		pos = vector3(0, 30.0f, 0.0f);
-		targ = vector3(0.0f, 0.0f, 1.0f);
-		up = vector3(0, -1.0f, 0.0f);
+		pos = vector3(30, 0.0f, 0.0f);
+		targ = vector3(0.0f, 0.0f, 0.0f);
+		up = vector3(0.0f, 0.0f, -1.0f);
 
 		//Setting the new location of the camera
 		m_pCamera->SetPositionTargetAndUpward(pos, targ, up);
