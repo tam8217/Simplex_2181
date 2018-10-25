@@ -28,6 +28,13 @@ class MyCamera
 
 	matrix4 m_m4View; //View matrix
 	matrix4 m_m4Projection; //Projection Matrix
+
+	quaternion orient;
+	vector3 rightAxis = AXIS_X;
+	float totalXRot;
+	float totalYRot;
+	vector3 look = vector3(0,0,-1.0f);
+
 public:
 	/*
 	USAGE: Constructor
@@ -230,6 +237,9 @@ public:
 	OUTPUT: ---
 	*/
 	void MoveSideways(float a_fDistance = 0.1f);
+
+	void ChangePitch(float);
+	void ChangeYaw(float);
 };
 
 } //namespace Simplex

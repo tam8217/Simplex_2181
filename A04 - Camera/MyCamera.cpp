@@ -153,10 +153,79 @@ void Simplex::MyCamera::CalculateProjectionMatrix(void)
 void MyCamera::MoveForward(float a_fDistance)
 {
 	//The following is just an example and does not take in account the forward vector (AKA view vector)
-	m_v3Position += vector3(0.0f, 0.0f,-a_fDistance);
+	/*m_v3Position += vector3(0.0f, 0.0f,-a_fDistance);
 	m_v3Target += vector3(0.0f, 0.0f, -a_fDistance);
 	m_v3Above += vector3(0.0f, 0.0f, -a_fDistance);
+	*/
+	
+	//Moving along the vector looking in front of the camera
+	m_v3Position += look * a_fDistance;
+	m_v3Target += look * a_fDistance;
+	m_v3Above += look * a_fDistance;
+
 }
 
-void MyCamera::MoveVertical(float a_fDistance){}//Needs to be defined
-void MyCamera::MoveSideways(float a_fDistance){}//Needs to be defined
+void MyCamera::MoveVertical(float a_fDistance)
+{
+	/*m_v3Position += vector3(0.0f, -a_fDistance, 0.0f);
+	m_v3Target += vector3(0.0f, -a_fDistance, 0.0f);
+	m_v3Above += vector3(0.0f, -a_fDistance, 0.0f);
+	*/
+	//Getting a vector in the direction above the camera
+	vector3 temp = m_v3Above - m_v3Position;
+
+	//Normalizing the vector so the amounts are managable
+	temp = glm::normalize(temp);
+
+	//Moving
+	m_v3Position += temp * a_fDistance;
+	m_v3Target += temp * a_fDistance;
+	m_v3Above += temp * a_fDistance;
+
+}//Needs to be defined
+void MyCamera::MoveSideways(float a_fDistance)
+{
+	/*m_v3Position += vector3(-a_fDistance, 0.0f,0.0f);
+	m_v3Target += vector3(-a_fDistance, 0.0f, 0.0f);
+	m_v3Above += vector3(-a_fDistance, 0.0f, 0.0f);
+	*/
+	rightAxis = glm::cross(m_v3Above, m_v3Target);
+	//rightAxis = glm::normalize(rightAxis);
+	vector3 temp = rightAxis - m_v3Position;
+	temp = glm::normalize(temp);
+	m_v3Position += temp * .1;
+	m_v3Target += temp* .1;
+	m_v3Above += temp* .1;
+
+}
+void Simplex::MyCamera::ChangePitch(float degNum)
+{
+	totalYRot += degNum;
+	//m_m4View = m_m4View * ToMatrix4(test);
+	//CalculateViewMatrix();	
+	quaternion changeOrient = glm::angleAxis(glm::radians(degNum), rightAxis);
+	orient = orient * changeOrient;
+	//vector3 test2 = glm::rotate(m_v3Target, glm::radians(degNum), AXIS_Y);
+	//std::cout << test2.x << " " << test2.y << " " << test2.z << std::endl;
+	//m_v3Target = m_v3Target * changeOrient;
+	m_v3Target = glm::rotate(changeOrient, m_v3Target);
+	//m_m4View = m_m4View * ToMatrix4(test);
+	//CalculateViewMatrix();	
+	look = m_v3Target - m_v3Position;
+	look = glm::normalize(look);
+}
+void Simplex::MyCamera::ChangeYaw(float degNum)
+{
+	totalXRot += degNum;
+	quaternion test = glm::angleAxis(glm::radians(degNum), AXIS_Y);
+	std::cout << glm::normalize(m_v3Above).y << std::endl;
+	std::cout << m_v3Above.x << " " <<  m_v3Above.y << " " <<m_v3Above.z <<std::endl;
+	//rightAxis =  rightAxis * test;
+	//rightAxis = glm::cross(m_v3Target, m_v3Above);
+	std::cout << rightAxis.x << " " << rightAxis.y << " " << rightAxis.z << std::endl;
+	m_v3Target = glm::rotate(test, m_v3Target);
+	//m_v3Target = m_v3Target * test;
+	look = m_v3Target - m_v3Position;
+	look = glm::normalize(look);
+}
+//Needs to be defined
