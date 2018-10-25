@@ -124,7 +124,7 @@ void Simplex::MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3
 	m_v3Target = a_v3Target;
 
 	m_v3Above = a_v3Position + glm::normalize(a_v3Upward);
-	
+	//rightAxis = glm::cross(m_v3Above, m_v3Target);
 	//Calculate the Matrix
 	CalculateProjectionMatrix();
 }
@@ -151,81 +151,83 @@ void Simplex::MyCamera::CalculateProjectionMatrix(void)
 }
 
 void MyCamera::MoveForward(float a_fDistance)
-{
-	//The following is just an example and does not take in account the forward vector (AKA view vector)
-	/*m_v3Position += vector3(0.0f, 0.0f,-a_fDistance);
-	m_v3Target += vector3(0.0f, 0.0f, -a_fDistance);
-	m_v3Above += vector3(0.0f, 0.0f, -a_fDistance);
-	*/
-	
+{	
 	//Moving along the vector looking in front of the camera
 	m_v3Position += look * a_fDistance;
 	m_v3Target += look * a_fDistance;
 	m_v3Above += look * a_fDistance;
-
 }
 
 void MyCamera::MoveVertical(float a_fDistance)
 {
-	/*m_v3Position += vector3(0.0f, -a_fDistance, 0.0f);
-	m_v3Target += vector3(0.0f, -a_fDistance, 0.0f);
-	m_v3Above += vector3(0.0f, -a_fDistance, 0.0f);
-	*/
 	//Getting a vector in the direction above the camera
-	vector3 temp = m_v3Above - m_v3Position;
+	vector3 norm = m_v3Above - m_v3Position;
 
 	//Normalizing the vector so the amounts are managable
-	temp = glm::normalize(temp);
+	norm = glm::normalize(norm);
 
 	//Moving
-	m_v3Position += temp * a_fDistance;
-	m_v3Target += temp * a_fDistance;
-	m_v3Above += temp * a_fDistance;
+	m_v3Position += norm * a_fDistance;
+	m_v3Target += norm * a_fDistance;
+	m_v3Above += norm * a_fDistance;
 
 }//Needs to be defined
 void MyCamera::MoveSideways(float a_fDistance)
 {
-	/*m_v3Position += vector3(-a_fDistance, 0.0f,0.0f);
-	m_v3Target += vector3(-a_fDistance, 0.0f, 0.0f);
-	m_v3Above += vector3(-a_fDistance, 0.0f, 0.0f);
-	*/
-	rightAxis = glm::cross(m_v3Above, m_v3Target);
-	//rightAxis = glm::normalize(rightAxis);
-	vector3 temp = rightAxis - m_v3Position;
-	temp = glm::normalize(temp);
-	m_v3Position += temp * .1;
-	m_v3Target += temp* .1;
-	m_v3Above += temp* .1;
+	//Normalizing the right vector to add
+	vector3 norm = rightAxis;
+	norm = glm::normalize(norm);
 
+	//Moving
+	m_v3Position += a_fDistance * norm;
+	m_v3Target += a_fDistance* norm;
+	m_v3Above += a_fDistance* norm;
 }
 void Simplex::MyCamera::ChangePitch(float degNum)
 {
-	totalYRot += degNum;
-	//m_m4View = m_m4View * ToMatrix4(test);
-	//CalculateViewMatrix();	
-	quaternion changeOrient = glm::angleAxis(glm::radians(degNum), rightAxis);
-	orient = orient * changeOrient;
-	//vector3 test2 = glm::rotate(m_v3Target, glm::radians(degNum), AXIS_Y);
-	//std::cout << test2.x << " " << test2.y << " " << test2.z << std::endl;
-	//m_v3Target = m_v3Target * changeOrient;
-	m_v3Target = glm::rotate(changeOrient, m_v3Target);
-	//m_m4View = m_m4View * ToMatrix4(test);
-	//CalculateViewMatrix();	
+	//Getting a vector perpendicular to the camera
+	vector3 perpVec = glm::cross((m_v3Position - m_v3Above), look);
+
+	//Making a quaternion for rotating around 
+	quaternion changeOrient = glm::angleAxis(glm::radians(degNum *2), perpVec);
+	
+	//Quickly recalculating look
+	look = m_v3Target - m_v3Position;
+
+	//Changing the rotation based strictly on look, then moving to correct position
+	m_v3Target = (changeOrient * look) + m_v3Position;
+
+	//Rotating the right vector
+	rightAxis = changeOrient * rightAxis;
+
+	//Rotating just around the vector that would be above the camera, then moving it to current position
+	m_v3Above = (changeOrient * (m_v3Above - m_v3Position)) + m_v3Position;
+
+	//Changing the look vector
 	look = m_v3Target - m_v3Position;
 	look = glm::normalize(look);
 }
 void Simplex::MyCamera::ChangeYaw(float degNum)
 {
-	totalXRot += degNum;
-	quaternion test = glm::angleAxis(glm::radians(degNum), AXIS_Y);
-	std::cout << glm::normalize(m_v3Above).y << std::endl;
-	std::cout << m_v3Above.x << " " <<  m_v3Above.y << " " <<m_v3Above.z <<std::endl;
-	//rightAxis =  rightAxis * test;
-	//rightAxis = glm::cross(m_v3Target, m_v3Above);
-	std::cout << rightAxis.x << " " << rightAxis.y << " " << rightAxis.z << std::endl;
-	m_v3Target = glm::rotate(test, m_v3Target);
-	//m_v3Target = m_v3Target * test;
+	//Getting a vector strictly above the camera
+	vector3 up = m_v3Position - m_v3Above;
+
+	//Quaternion to change the rotation of the vectors
+	quaternion changeOrient = glm::angleAxis(glm::radians(degNum),up);
+
+	//Recalculating look for use 
+	look = m_v3Target - m_v3Position;
+
+	//Changing the rotation of strictly look, then moving to correct position
+	m_v3Target = (changeOrient * look) + m_v3Position;
+	
+	//Rotating the right vector
+	rightAxis = changeOrient * rightAxis;
+	
+	//Rotating just around the vector that would be above the camera, then moving it to current position
+	m_v3Above = (changeOrient * (m_v3Above - m_v3Position)) + m_v3Position;
+
+	//Calculating the look vector to be used in movement
 	look = m_v3Target - m_v3Position;
 	look = glm::normalize(look);
 }
-//Needs to be defined

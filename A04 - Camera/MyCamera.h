@@ -29,10 +29,10 @@ class MyCamera
 	matrix4 m_m4View; //View matrix
 	matrix4 m_m4Projection; //Projection Matrix
 
-	quaternion orient;
+	//Vector pointing to the right of the camera
 	vector3 rightAxis = AXIS_X;
-	float totalXRot;
-	float totalYRot;
+
+	//Vector for where the camera is looking
 	vector3 look = vector3(0,0,-1.0f);
 
 public:
