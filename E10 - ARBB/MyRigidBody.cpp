@@ -87,8 +87,29 @@ void MyRigidBody::SetModelMatrix(matrix4 a_m4ModelMatrix)
 	//your code goes here---------------------
 	m_v3MinG = m_v3MinL;
 	m_v3MaxG = m_v3MaxL;
+
+	vector3 v3Points[8];
+	
+	v3Points[0] = vector3(m_v3MinL.x, m_v3MinL.y, m_v3MinL.z);
+	v3Points[1] = vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MinL.z);
+	v3Points[2] = vector3(m_v3MaxL.x, m_v3MaxL.y, m_v3MinL.z);
+	v3Points[3] = vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MinL.z);
+
+	v3Points[4] = vector3(m_v3MinL.x, m_v3MinL.y, m_v3MaxL.z);
+	v3Points[5] = vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MaxL.z);
+	v3Points[6] = vector3(m_v3MaxL.x, m_v3MaxL.y, m_v3MaxL.z);
+	v3Points[7] = vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MaxL.z);
+	
+	
+	for (size_t i = 0; i < 8; i++)
+	{
+		v3Points[i] = m_m4ToWorld * vector4(v3Points[i], 1.0f);
+	}
+
+
 	//----------------------------------------
 
+	m_v3MaxG = m_v3MinG = v3Points[0];
 	//we calculate the distance between min and max vectors
 	m_v3ARBBSize = m_v3MaxG - m_v3MinG;
 }
