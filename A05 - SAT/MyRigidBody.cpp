@@ -286,7 +286,129 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	Simplex that might help you [eSATResults] feel free to use it.
 	(eSATResults::SAT_NONE has a value of 0)
 	*/
+	
+	//Artificial 3x3 matricies to hold rotaitons
+	float rotation[3][3];
+	float absoluteRotation[3][3];
 
+	
+	//Getting the axes of each of the rigid bodies to compare across
+	vector3 firstAxes[3];
+	vector3 secondAxes[3];
+
+	//Getting the x axis of this rigid body in global space
+	firstAxes[0] = vector3(vector4(m_v3MaxL.x, m_v3Center.y, m_v3Center.z, 0.0f) * m_m4ToWorld);
+
+	//Getting the y axis in global space
+	firstAxes[1] = vector3(vector4(m_v3Center.x, m_v3MaxL.y, m_v3Center.z, 0.0f) * m_m4ToWorld);
+
+	//Getting the z axis in global space
+	firstAxes[2] = vector3(vector4(m_v3Center.x, m_v3Center.y, m_v3MaxL.z, 0.0f) * m_m4ToWorld);
+
+	//Performing the same calculations for the other rigib body
+	secondAxes[0] = vector3(vector4(a_pOther->m_v3MaxL.x, a_pOther->m_v3Center.y, a_pOther->m_v3Center.z, 0.0f) * a_pOther->m_m4ToWorld);
+	secondAxes[1] = vector3(vector4(a_pOther->m_v3Center.x, a_pOther->m_v3MaxL.y, a_pOther->m_v3Center.z, 0.0f) * a_pOther->m_m4ToWorld);
+	secondAxes[2] = vector3(vector4(a_pOther->m_v3Center.x, a_pOther->m_v3Center.y, a_pOther->m_v3MaxL.z, 0.0f) * a_pOther->m_m4ToWorld);
+	
+	//Geting the global centers of both rigid bodies
+	vector3 center1 = vector3(vector4(m_v3Center, 0.0f) * m_m4ToWorld);
+	vector3 center2 = vector3(vector4(a_pOther->m_v3Center, 0.0f) * a_pOther->m_m4ToWorld);
+
+
+	//Getting the rotation matrix 
+	for (size_t i = 0; i < 3; i++)
+	{
+		for (size_t j = 0; j < 3; j++)
+		{
+			rotation[i][j] = glm::dot(firstAxes[i], secondAxes[j]);
+		}
+	}
+
+	//Getting the line between both centers
+	vector3 translationVector = center2 - center1;
+
+	translationVector = vector3(glm::dot(translationVector, firstAxes[0]), glm::dot(translationVector, firstAxes[1]), glm::dot(translationVector, firstAxes[2]));
+
+
+	//Getting the absolute value of the rotations
+	for (size_t i = 0; i < 3; i++)
+	{
+		for (size_t j = 0; j < 3; j++)
+		{
+			absoluteRotation[i][j] = glm::abs(rotation[i][j]);
+		}
+	}
+	float axisA = 0;
+	float axisB = 0;
+	//Testing
+	for (size_t i = 0; i < 3; i++)
+	{
+		axisA = m_v3HalfWidth[i];
+		axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[i][0] + a_pOther->m_v3HalfWidth[1] * absoluteRotation[i][1] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[i][2];
+		if (glm::abs(translationVector[i]) > (axisA + axisB))
+			return 0;
+	}
+
+	for (size_t i = 0; i < 3; i++)
+	{
+		axisA = m_v3HalfWidth[0] * absoluteRotation[0][i] + m_v3HalfWidth[1] * absoluteRotation[1][i] + m_v3HalfWidth[2] * absoluteRotation[2][i];
+		axisB = a_pOther->m_v3HalfWidth[i];
+		if (glm::abs(translationVector[0] * rotation[0][i] + translationVector[1] * rotation[1][i] + translationVector[2] * rotation[2][i]) > (axisA + axisB))
+			return 0;
+	}
+
+	axisA =  m_v3HalfWidth[1] * absoluteRotation[2][0] + m_v3HalfWidth[2] * absoluteRotation[1][0];
+	axisB = a_pOther->m_v3HalfWidth[1] * absoluteRotation[0][2] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[0][1];
+	if (glm::abs(translationVector[2] * rotation[1][0] - translationVector[1] * rotation[2][0]) > (axisA + axisB))
+		return 0;
+
+	axisA = m_v3HalfWidth[1] * absoluteRotation[2][1] + m_v3HalfWidth[2] * absoluteRotation[1][1];
+	axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[0][2] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[0][0];
+	if (glm::abs(translationVector[2] * rotation[1][1] - translationVector[1] * rotation[2][1]) > (axisA + axisB))
+		return 0;
+
+	axisA = m_v3HalfWidth[1] * absoluteRotation[2][2] + m_v3HalfWidth[2] * absoluteRotation[1][2];
+	axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[0][1] + a_pOther->m_v3HalfWidth[1] * absoluteRotation[0][0];
+	if (glm::abs(translationVector[2] * rotation[1][2] - translationVector[1] * rotation[2][2]) > (axisA + axisB))
+		return 0;
+
+	axisA = m_v3HalfWidth[0] * absoluteRotation[2][0] + m_v3HalfWidth[2] * absoluteRotation[0][0];
+	axisB = a_pOther->m_v3HalfWidth[1] * absoluteRotation[1][2] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[1][1];
+	if (glm::abs(translationVector[0] * rotation[2][0] - translationVector[2] * rotation[0][0]) > (axisA + axisB))
+		return 0;
+
+	axisA = m_v3HalfWidth[0] * absoluteRotation[2][1] + m_v3HalfWidth[2] * absoluteRotation[0][1];
+	axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[1][2] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[1][0];
+	if (glm::abs(translationVector[0] * rotation[2][1] - translationVector[2] * rotation[0][1]) > (axisA + axisB))
+		return 0;
+
+	axisA = m_v3HalfWidth[0] * absoluteRotation[2][2] + m_v3HalfWidth[2] * absoluteRotation[0][2];
+	axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[1][1] + a_pOther->m_v3HalfWidth[1] * absoluteRotation[1][0];
+	if (glm::abs(translationVector[0] * rotation[2][2] - translationVector[2] * rotation[0][2]) > (axisA + axisB))
+		return 0;
+
+	axisA = m_v3HalfWidth[0] * absoluteRotation[1][0] + m_v3HalfWidth[1] * absoluteRotation[0][0];
+	axisB = a_pOther->m_v3HalfWidth[1] * absoluteRotation[2][2] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[2][1];
+	if (glm::abs(translationVector[1] * rotation[0][0] - translationVector[0] * rotation[1][0]) > (axisA + axisB))
+		return 0;
+
+	axisA = m_v3HalfWidth[0] * absoluteRotation[1][1] + m_v3HalfWidth[1] * absoluteRotation[0][1];
+	axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[2][2] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[2][0];
+	if (glm::abs(translationVector[1] * rotation[0][1] - translationVector[0] * rotation[1][1]) > (axisA + axisB))
+		return 0;
+	
+	axisA = m_v3HalfWidth[0] * absoluteRotation[1][2] + m_v3HalfWidth[1] * absoluteRotation[0][2];
+	axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[2][1] + a_pOther->m_v3HalfWidth[1] * absoluteRotation[2][0];
+	if (glm::abs(translationVector[1] * rotation[0][2] - translationVector[0] * rotation[1][2]) > (axisA + axisB))
+		return 0;
+	//vector3 midpoint = (center1 + center2) / 2.0f;
+
+	//Attempting to get perpendicular vector to the between vector
+	//vector3 perpVec = glm::cross(midpoint, betweenVector);
+
+	std::cout << "Reached bottom" << std::endl;
 	//there is no axis test that separates this two objects
+	//return 1;
+
 	return eSATResults::SAT_NONE;
 }
