@@ -301,57 +301,29 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	vector3 center2 = a_pOther->GetCenterGlobal();
 
 	//Getting the x axis of this rigid body in global space
-	//firstAxes[0] = glm::normalize(vector3(vector4(m_v3MaxG.x, center1.y, center1.z, 0.0f) * m_m4ToWorld));
-	firstAxes[0] = vector3(vector4(AXIS_X, 0.0f) * m_m4ToWorld);
-	//firstAxes[0] = firstAxes[0] + center1;
-	firstAxes[0] = glm::normalize(firstAxes[0]);
-	//firstAxes[0] = vector3(vector4(m_v3MaxG.x, center1.y, center1.z, 0.0f) * m_m4ToWorld);
-	//firstAxes[0] = vector3(vector4(m_v3MaxG.x, center1.y, center1.z, 0.0f));
+	firstAxes[0] = glm::normalize(m_m4ToWorld * vector4(AXIS_X, 0.0f));
 
 	//Getting the y axis in global space
-	//firstAxes[1] = glm::normalize(vector3(vector4(center1.x, m_v3MaxG.y, center1.z, 0.0f) * m_m4ToWorld));
-	//firstAxes[1] = vector3(vector4(center1.x, m_v3MaxG.y, center1.z, 0.0f));
-	firstAxes[1] = glm::normalize(vector3(vector4(AXIS_Y, 0.0f) * m_m4ToWorld));
+	firstAxes[1] = glm::normalize(m_m4ToWorld * vector4(AXIS_Y, 0.0f));
 
 	//Getting the z axis in global space
-	//firstAxes[2] = glm::normalize(vector3(vector4(center1.x, center1.y, m_v3MaxG.z, 0.0f) * m_m4ToWorld));
-	//firstAxes[2] = vector3(vector4(center1.x, center1.y, m_v3MaxG.z, 0.0f));
-	firstAxes[2] = glm::normalize(vector3(vector4(AXIS_Z, 0.0f) * m_m4ToWorld));
+	firstAxes[2] = glm::normalize(m_m4ToWorld * vector4(AXIS_Z, 0.0f));
 
 
 	//Performing the same calculations for the other rigib body
-	//secondAxes[0] = glm::normalize(vector3(vector4(a_pOther->m_v3MaxG.x, center2.y, center2.z, 0.0f) * a_pOther->m_m4ToWorld));
-	secondAxes[0] = glm::normalize(vector3(vector4(AXIS_X, 0.0f) * a_pOther->m_m4ToWorld));
-
-	//secondAxes[1] = glm::normalize(vector3(vector4(center2.x, a_pOther->m_v3MaxG.y, center2.z, 0.0f) * a_pOther->m_m4ToWorld));
-	secondAxes[1] = glm::normalize(vector3(vector4(AXIS_Y, 0.0f) * a_pOther->m_m4ToWorld));
-
-	//secondAxes[2] = glm::normalize(vector3(vector4(center2.x, center2.y, a_pOther->m_v3MaxG.z, 0.0f) * a_pOther->m_m4ToWorld));
-	secondAxes[2] = glm::normalize(vector3(vector4(AXIS_Z, 0.0f) * a_pOther->m_m4ToWorld));
-
-	
-	std::cout << "First axes: X " << firstAxes[0].x << " " << firstAxes[0].y << " " << firstAxes[0].z << std::endl;
-	std::cout << "First axes: Y " << firstAxes[1].x << " " << firstAxes[1].y << " " << firstAxes[1].z << std::endl;
-	std::cout << "First axes: Z " << firstAxes[2].x << " " << firstAxes[2].y << " " << firstAxes[2].z << std::endl;
-
-	std::cout << "second axes: X " << secondAxes[0].x << " " << secondAxes[0].y << " " << secondAxes[0].z << std::endl;
-	std::cout << "second axes: Y " << secondAxes[1].x << " " << secondAxes[1].y << " " << secondAxes[1].z << std::endl;
-	std::cout << "second axes: Z " << secondAxes[2].x << " " << secondAxes[2].y << " " << secondAxes[2].z << std::endl;
-
-	std::cout << " " << std::endl;
+	secondAxes[0] = glm::normalize(a_pOther->m_m4ToWorld * vector4(AXIS_X, 0.0f));
+	secondAxes[1] = glm::normalize(a_pOther->m_m4ToWorld * vector4(AXIS_Y, 0.0f));
+	secondAxes[2] = glm::normalize(a_pOther->m_m4ToWorld * vector4(AXIS_Z, 0.0f));
 
 	//Getting the rotation matrix 
-	for (size_t i = 0; i < 3; i++)
-	{
-		for (size_t j = 0; j < 3; j++)
-		{
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
 			rotation[i][j] = glm::dot(firstAxes[i], secondAxes[j]);
-		}
-	}
 
 	//Getting the line between both centers
 	vector3 translationVector = center2 - center1;
 
+	//Changing the translation frame of reference
 	translationVector = vector3(glm::dot(translationVector, firstAxes[0]), glm::dot(translationVector, firstAxes[1]), glm::dot(translationVector, firstAxes[2]));
 
 
@@ -364,127 +336,85 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		}
 	}
 
+	//Temporary floats to hold calculations for the rigid bodies
 	float axisA = 0;
 	float axisB = 0;
-	/*
+	
 
-	// Test axes L = A0, L = A1, L = A2
-	for (int i = 0; i < 3; i++) {
-		ra = a.e[i];
-		rb = b.e[0] * AbsR[i][0] + b.e[1] * AbsR[i][1] + b.e[2] * AbsR[i][2];
-		if (Abs(t[i]) > ra + rb) return 0;
-	}
-	// Test axes L = B0, L = B1, L = B2
-	for (int i = 0; i < 3; i++) {
-		ra = a.e[0] * AbsR[0][i] + a.e[1] * AbsR[1][i] + a.e[2] * AbsR[2][i];
-		rb = b.e[i];
-		if (Abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb) return 0;
-	}
-	*/
-
-	//Testing
+	//Testing cases for the SAT
+	//Test axes L = A0, L = A1, L = A2
 	for (size_t i = 0; i < 3; i++)
 	{
 		axisA = m_v3HalfWidth[i];
-		axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[i][0] + a_pOther->m_v3HalfWidth[1] * absoluteRotation[i][1] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[i][2];
+		axisB = a_pOther->GetHalfWidth()[0] * absoluteRotation[i][0] + a_pOther->GetHalfWidth()[1] * absoluteRotation[i][1] + a_pOther->GetHalfWidth()[2] * absoluteRotation[i][2];
 		if (glm::abs(translationVector[i]) > axisA + axisB)
 			return 1;
 	}
 
+	// Test axes L = B0, L = B1, L = B2
 	for (size_t i = 0; i < 3; i++)
 	{
 		axisA = m_v3HalfWidth[0] * absoluteRotation[0][i] + m_v3HalfWidth[1] * absoluteRotation[1][i] + m_v3HalfWidth[2] * absoluteRotation[2][i];
-		axisB = a_pOther->m_v3HalfWidth[i];
-		if (glm::abs(translationVector[0] * rotation[0][i] + translationVector[1] * rotation[1][i] + translationVector[2] * rotation[2][i]) > (axisA + axisB))
+		axisB = a_pOther->GetHalfWidth()[i];
+		if (glm::abs(translationVector[0] * rotation[0][i] + translationVector[1] * rotation[1][i] + translationVector[2] * rotation[2][i]) > axisA + axisB)
 			return 1;
 	}
 
-	/*// Test axis L = A0 x B0
-	ra = a.e[1] * AbsR[2][0] + a.e[2] * AbsR[1][0];
-	rb = b.e[1] * AbsR[0][2] + b.e[2] * AbsR[0][1];
-	if (Abs(t[2] * R[1][0] - t[1] * R[2][0]) > ra + rb) return 0;
+	// Test axis L = A0 x B0
+	axisA = m_v3HalfWidth[1] * absoluteRotation[2][0] + m_v3HalfWidth[2] * absoluteRotation[1][0];
+	axisB = a_pOther->GetHalfWidth()[1] * absoluteRotation[0][2] + a_pOther->GetHalfWidth()[2] * absoluteRotation[0][1];
+	if (abs(translationVector[2] * rotation[1][0] - translationVector[1] * rotation[2][0]) > axisA + axisB)
+		return 1;
+
 	// Test axis L = A0 x B1
-	ra = a.e[1] * AbsR[2][1] + a.e[2] * AbsR[1][1];
-	rb = b.e[0] * AbsR[0][2] + b.e[2] * AbsR[0][0];
-	if (Abs(t[2] * R[1][1] - t[1] * R[2][1]) > ra + rb) return 0;*/
-	axisA =  m_v3HalfWidth[1] * absoluteRotation[2][0] + m_v3HalfWidth[2] * absoluteRotation[1][0];
-	axisB = a_pOther->m_v3HalfWidth[1] * absoluteRotation[0][2] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[0][1];
-	if (glm::abs(translationVector[2] * rotation[1][0] - translationVector[1] * rotation[2][0]) > (axisA + axisB))
-		return 1;
-
 	axisA = m_v3HalfWidth[1] * absoluteRotation[2][1] + m_v3HalfWidth[2] * absoluteRotation[1][1];
-	axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[0][2] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[0][0];
-	if (glm::abs(translationVector[2] * rotation[1][1] - translationVector[1] * rotation[2][1]) > (axisA + axisB))
+	axisB = a_pOther->GetHalfWidth()[0] * absoluteRotation[0][2] + a_pOther->GetHalfWidth()[2] * absoluteRotation[0][0];
+	if (abs(translationVector[2] * rotation[1][1] - translationVector[1] * rotation[2][1]) > axisA + axisB)
 		return 1;
 
-	/*// Test axis L = A0 x B2
-ra = a.e[1] * AbsR[2][2] + a.e[2] * AbsR[1][2];
-rb = b.e[0] * AbsR[0][1] + b.e[1] * AbsR[0][0];
-if (Abs(t[2] * R[1][2] - t[1] * R[2][2]) > ra + rb) return 0;
-// Test axis L = A1 x B0
-ra = a.e[0] * AbsR[2][0] + a.e[2] * AbsR[0][0];
-rb = b.e[1] * AbsR[1][2] + b.e[2] * AbsR[1][1];
-
-if (Abs(t[0] * R[2][0] - t[2] * R[0][0]) > ra + rb) return 0;*/
+	// Test axis L = A0 x B2
 	axisA = m_v3HalfWidth[1] * absoluteRotation[2][2] + m_v3HalfWidth[2] * absoluteRotation[1][2];
-	axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[0][1] + a_pOther->m_v3HalfWidth[1] * absoluteRotation[0][0];
-	if (glm::abs(translationVector[2] * rotation[1][2] - translationVector[1] * rotation[2][2]) > (axisA + axisB))
+	axisB = a_pOther->GetHalfWidth()[0] * absoluteRotation[0][1] + a_pOther->GetHalfWidth()[1] * absoluteRotation[0][0];
+	if (abs(translationVector[2] * rotation[1][2] - translationVector[1] * rotation[2][2]) > axisA + axisB)
 		return 1;
 
+	// Test axis L = A1 x B0
 	axisA = m_v3HalfWidth[0] * absoluteRotation[2][0] + m_v3HalfWidth[2] * absoluteRotation[0][0];
-	axisB = a_pOther->m_v3HalfWidth[1] * absoluteRotation[1][2] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[1][1];
-	if (glm::abs(translationVector[0] * rotation[2][0] - translationVector[2] * rotation[0][0]) > (axisA + axisB))
+	axisB = a_pOther->GetHalfWidth()[1] * absoluteRotation[1][2] + a_pOther->GetHalfWidth()[2] * absoluteRotation[1][1];
+	if (abs(translationVector[0] * rotation[2][0] - translationVector[2] * rotation[0][0]) > axisA + axisB)
 		return 1;
 
-	/*// Test axis L = A1 x B1
-ra = a.e[0] * AbsR[2][1] + a.e[2] * AbsR[0][1];
-rb = b.e[0] * AbsR[1][2] + b.e[2] * AbsR[1][0];
-if (Abs(t[0] * R[2][1] - t[2] * R[0][1]) > ra + rb) return 0;
-// Test axis L = A1 x B2
-ra = a.e[0] * AbsR[2][2] + a.e[2] * AbsR[0][2];
-rb = b.e[0] * AbsR[1][1] + b.e[1] * AbsR[1][0];
-if (Abs(t[0] * R[2][2] - t[2] * R[0][2]) > ra + rb) return 0;*/
-
+	// Test axis L = A1 x B1
 	axisA = m_v3HalfWidth[0] * absoluteRotation[2][1] + m_v3HalfWidth[2] * absoluteRotation[0][1];
-	axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[1][2] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[1][0];
-	if (glm::abs(translationVector[0] * rotation[2][1] - translationVector[2] * rotation[0][1]) > (axisA + axisB))
+	axisB = a_pOther->GetHalfWidth()[0] * absoluteRotation[1][2] + a_pOther->GetHalfWidth()[2] * absoluteRotation[1][0];
+	if (abs(translationVector[0] * rotation[2][1] - translationVector[2] * rotation[0][1]) > axisA + axisB)
 		return 1;
 
+	// Test axis L = A1 x B2
 	axisA = m_v3HalfWidth[0] * absoluteRotation[2][2] + m_v3HalfWidth[2] * absoluteRotation[0][2];
-	axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[1][1] + a_pOther->m_v3HalfWidth[1] * absoluteRotation[1][0];
-	if (glm::abs(translationVector[0] * rotation[2][2] - translationVector[2] * rotation[0][2]) > (axisA + axisB))
+	axisB = a_pOther->GetHalfWidth()[0] * absoluteRotation[1][1] + a_pOther->GetHalfWidth()[1] * absoluteRotation[1][0];
+	if (abs(translationVector[0] * rotation[2][2] - translationVector[2] * rotation[0][2]) > axisA + axisB)
 		return 1;
 
-
-	/*
 	// Test axis L = A2 x B0
-ra = a.e[0] * AbsR[1][0] + a.e[1] * AbsR[0][0];
-rb = b.e[1] * AbsR[2][2] + b.e[2] * AbsR[2][1];
-if (Abs(t[1] * R[0][0] - t[0] * R[1][0]) > ra + rb) return 0;
-// Test axis L = A2 x B1
-ra = a.e[0] * AbsR[1][1] + a.e[1] * AbsR[0][1];
-rb = b.e[0] * AbsR[2][2] + b.e[2] * AbsR[2][0];
-if (Abs(t[1] * R[0][1] - t[0] * R[1][1]) > ra + rb) return 0;
-// Test axis L = A2 x B2
-ra = a.e[0] * AbsR[1][2] + a.e[1] * AbsR[0][2];
-rb = b.e[0] * AbsR[2][1] + b.e[1] * AbsR[2][0];
-if (Abs(t[1] * R[0][2] - t[0] * R[1][2]) > ra + rb) return 0;*/
 	axisA = m_v3HalfWidth[0] * absoluteRotation[1][0] + m_v3HalfWidth[1] * absoluteRotation[0][0];
-	axisB = a_pOther->m_v3HalfWidth[1] * absoluteRotation[2][2] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[2][1];
-	if (glm::abs(translationVector[1] * rotation[0][0] - translationVector[0] * rotation[1][0]) > (axisA + axisB))
+	axisB = a_pOther->GetHalfWidth()[1] * absoluteRotation[2][2] + a_pOther->GetHalfWidth()[2] * absoluteRotation[2][1];
+	if (abs(translationVector[1] * rotation[0][0] - translationVector[0] * rotation[1][0]) > axisA + axisB)
 		return 1;
 
+
+	// Test axis L = A2 x B1
 	axisA = m_v3HalfWidth[0] * absoluteRotation[1][1] + m_v3HalfWidth[1] * absoluteRotation[0][1];
-	axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[2][2] + a_pOther->m_v3HalfWidth[2] * absoluteRotation[2][0];
-	if (glm::abs(translationVector[1] * rotation[0][1] - translationVector[0] * rotation[1][1]) > (axisA + axisB))
+	axisB = a_pOther->GetHalfWidth()[0] * absoluteRotation[2][2] + a_pOther->GetHalfWidth()[2] * absoluteRotation[2][0];
+	if (abs(translationVector[1] * rotation[0][1] - translationVector[0] * rotation[1][1]) > axisA + axisB) 
 		return 1;
-	
-	axisA = m_v3HalfWidth[0] * absoluteRotation[1][2] + m_v3HalfWidth[1] * absoluteRotation[0][2];
-	axisB = a_pOther->m_v3HalfWidth[0] * absoluteRotation[2][1] + a_pOther->m_v3HalfWidth[1] * absoluteRotation[2][0];
-	if (glm::abs(translationVector[1] * rotation[0][2] - translationVector[0] * rotation[1][2]) > (axisA + axisB))
-		return 1;
-	//there is no axis test that separates this two objects
-	//return 1;
 
+	// Test axis L = A2 x B2
+	axisA = m_v3HalfWidth[0] * absoluteRotation[1][2] + m_v3HalfWidth[1] * absoluteRotation[0][2];
+	axisB = a_pOther->GetHalfWidth()[0] * absoluteRotation[2][1] + a_pOther->GetHalfWidth()[1] * absoluteRotation[2][0];
+	if (abs(translationVector[1] * rotation[0][2] - translationVector[0] * rotation[1][2]) > axisA + axisB) 
+		return 1;
+
+	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
 }
