@@ -1,4 +1,5 @@
 #include "AppClass.h"
+#include "MyEntityManager.h"
 using namespace Simplex;
 //Mouse
 void Application::ProcessMouseMovement(sf::Event a_event)
@@ -128,7 +129,7 @@ void Application::ProcessKeyReleased(sf::Event a_event)
 	case sf::Keyboard::Add:
 		if (m_uOctantLevels < 4)
 		{
-			m_pEntityMngr->ClearDimensionSetAll();
+			//m_pEntityMngr->ClearDimensionSetAll();
 			++m_uOctantLevels;
 			/*
 			SafeDelete(m_pRoot);
@@ -139,7 +140,7 @@ void Application::ProcessKeyReleased(sf::Event a_event)
 	case sf::Keyboard::Subtract:
 		if (m_uOctantLevels > 0)
 		{
-			m_pEntityMngr->ClearDimensionSetAll();
+			//m_pEntityMngr->ClearDimensionSetAll();
 			--m_uOctantLevels;
 			/*
 			SafeDelete(m_pRoot);

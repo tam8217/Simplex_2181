@@ -20,8 +20,9 @@ void Application::InitVariables(void)
 	int nSquare = static_cast<int>(std::sqrt(uInstances));
 	uInstances = nSquare * nSquare;
 	uint uIndex = 0;
-	//m_pEntityMngr->AddEntity("Minecraft\\Cube.obj");
-	//m_pEntityMngr->SetModelMatrix(glm::translate(vector3(50.0f, 0.0f, 0.0f)));
+	m_pEntityMngr->AddEntity("Minecraft\\Cube.obj");
+	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(50.0f, 0.0f, 0.0f)));
+
 	for (int i = 0; i < nSquare; i++)
 	{
 		for (int j = 0; j < nSquare; j++)
