@@ -1,5 +1,4 @@
 #include "AppClass.h"
-#include "MyEntityManager.h"
 using namespace Simplex;
 //Mouse
 void Application::ProcessMouseMovement(sf::Event a_event)
@@ -112,43 +111,30 @@ void Application::ProcessKeyReleased(sf::Event a_event)
 		bFPSControl = !bFPSControl;
 		m_pCameraMngr->SetFPS(bFPSControl);
 		break;
-	case sf::Keyboard::PageUp:
-		++m_uOctantID;
-		
-		if (m_uOctantID >= m_pRoot->GetOctantCount())
-			m_uOctantID = - 1;
-		
-		break;
-	case sf::Keyboard::PageDown:
-		--m_uOctantID;
-		
-		if (m_uOctantID >= m_pRoot->GetOctantCount())
-			m_uOctantID = - 1;
-		if (m_uOctantID <= -1)
-			m_uOctantID = -1;
-		break;
 	case sf::Keyboard::Add:
-		if (m_uOctantLevels < 4)
+		++m_uActCont;
+		m_uActCont %= 8;
+		if (m_uControllerCount > 0)
 		{
-			m_pEntityMngr->ClearDimensionSetAll();
-			++m_uOctantLevels;
-			
-			SafeDelete(m_pRoot);
-			//m_pRoot = new MyOctant(m_uOctantLevels, 5);
-			m_pRoot = new MyOctant(m_uOctantLevels, 5);
-
+			while (m_pController[m_uActCont]->uModel == SimplexController_NONE)
+			{
+				++m_uActCont;
+				m_uActCont %= 8;
+			}
 		}
 		break;
 	case sf::Keyboard::Subtract:
-		if (m_uOctantLevels > 0)
+		--m_uActCont;
+		if (m_uActCont > 7)
+			m_uActCont = 7;
+		if (m_uControllerCount > 0)
 		{
-			m_pEntityMngr->ClearDimensionSetAll();
-			--m_uOctantLevels;
-			
-			SafeDelete(m_pRoot);
-			//m_pRoot = new MyOctant(m_uOctantLevels, 5);
-			m_pRoot = new MyOctant(m_uOctantLevels, 5);
-
+			while (m_pController[m_uActCont]->uModel == SimplexController_NONE)
+			{
+				--m_uActCont;
+				if (m_uActCont > 7)
+					m_uActCont = 7;
+			}
 		}
 		break;
 	case sf::Keyboard::LShift:
@@ -169,7 +155,6 @@ void Application::ProcessJoystickConnected(uint nController)
 		return;
 
 	bool bConnected = sf::Joystick::isConnected(nController);
-	m_bGUI_Controller = bConnected;
 	if (bConnected)
 	{
 		SafeDelete(m_pController[nController]);
@@ -442,6 +427,15 @@ void Application::ProcessKeyboard(void)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
 		m_pCameraMngr->MoveVertical(m_fMovementSpeed * fMultiplier);
 #pragma endregion
+
+	//Modifying the time between stops
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::O))
+	{
+		if(m_fTimeBetweenStops > .55f)
+			m_fTimeBetweenStops -= .05f;
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::P))
+		m_fTimeBetweenStops += .05f;
 }
 //Joystick
 void Application::ProcessJoystick(void)

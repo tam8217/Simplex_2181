@@ -9,6 +9,15 @@ void MyEntityManager::Init(void)
 	m_EntityList.clear();
 	//std::cout << "Actually running?!" << std::endl;
 }
+
+void MyEntityManager::ClearDimensionSetAll()
+{
+	for (uint i = 0; i < m_uEntityCount; ++i)
+	{
+		ClearDimensionSet(i);
+	}
+}
+
 void MyEntityManager::Release(void)
 {
 	for (uint uEntity = 0; uEntity < m_uEntityCount; ++uEntity)
@@ -176,7 +185,7 @@ void Simplex::MyEntityManager::Update(void)
 	//Clear all collisions
 	for (uint i = 0; i < m_uEntityCount; i++)
 	{
-		m_EntityList[i]->ClearCollisionList();
+		m_mEntityArray[i]->ClearCollisionList();
 	}
 
 	//check collisions

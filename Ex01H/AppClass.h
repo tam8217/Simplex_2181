@@ -10,29 +10,25 @@ Date: 2017/06
 #include "ControllerConfiguration.h"
 #include "imgui\ImGuiObject.h"
 
-#include "MyEntityManager.h"
-#include "MyOctant.h"
+#include "MyMesh.h"
 
 namespace Simplex
 {
 	//Adding Application to the Simplex namespace
 class Application
 {
-	MyEntityManager* m_pEntityMngr = nullptr; //Entity Manager
-	uint m_uOctantID = -1; //Index of Octant to display
-	uint m_uObjects = 0; //Number of objects in the scene
-	uint m_uOctantLevels = 0; //Number of levels in the octree
-	MyOctant* m_pRoot = nullptr;
-	std::vector<uint> indexVector;
+	float m_fTimeBetweenStops = 2.0f; //time that takes to go from one stop to the next
+	MyMesh* m_pGuideCube = nullptr; //Cube to Navigate
+	MyMesh* m_pMesh = nullptr; //Mesh to generate
+	String m_sProgramer = "DEFAULT"; //Name of programmer
+
+	MyMesh* bodyCyl = nullptr;
+	MyMesh* eraseCyl = nullptr;
+	std::vector<vector3> allStopList;
 
 private:
-	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu"; //programmer
-
 	static ImGuiObject gui; //GUI object
 	bool m_bGUI_Main = true; //show Main GUI window?
-	bool m_bGUI_Console = true; //show Credits GUI window?
-	bool m_bGUI_Test = false; //show Test GUI window?
-	bool m_bGUI_Controller = false; //show Controller GUI window?
 
 	uint m_uRenderCallCount = 0; //count of render calls per frame
 	uint m_uControllerCount = 0; //count of controllers connected
@@ -43,11 +39,11 @@ private:
 
 	vector3 m_v3Mouse = vector3(); //position of the mouse in the window
 	bool m_bFPC = false;// First Person Camera flag
-	bool m_bArcBall = false;// ArcBall flag
+	bool m_bArcBall = false;// Arcball flag
 	quaternion m_qArcBall; //ArcBall quaternion
 
 	vector4 m_v4ClearColor; //Color of the scene
-	bool m_bRunning = false; //Is App running?
+	bool m_bRunning = false; //Is app running?
 	bool m_bModifier = false; //is shift pressed?
 
 	sf::Window* m_pWindow = nullptr; //SFML window
@@ -55,7 +51,6 @@ private:
 	LightManager* m_pLightMngr = nullptr; //Light Manager of the system
 	MeshManager* m_pMeshMngr = nullptr; //Mesh Manager
 	CameraManager* m_pCameraMngr = nullptr; //Singleton for the camera manager
-	
 	ControllerInput* m_pController[8]; //Controller
 	uint m_uActCont = 0; //Active Controller of the Application
 

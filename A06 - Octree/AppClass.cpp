@@ -18,20 +18,26 @@ void Application::InitVariables(void)
 	int nSquare = static_cast<int>(std::sqrt(uInstances));
 	m_uObjects = nSquare * nSquare;
 	uint uIndex = -1;
+
 	for (int i = 0; i < nSquare; i++)
 	{
 		for (int j = 0; j < nSquare; j++)
 		{
-			uIndex++;
+			//uIndex++;
 			m_pEntityMngr->AddEntity("Minecraft\\Cube.obj");
 			vector3 v3Position = vector3(glm::sphericalRand(34.0f));
 			matrix4 m4Position = glm::translate(v3Position);
 			m_pEntityMngr->SetModelMatrix(m4Position);
+			m_pEntityMngr->AddDimension(-1, uIndex);
+			//indexVector.push_back(uIndex);
+			uIndex++;
 		}
 	}
-	m_uOctantLevels = 1;
+
+	m_uOctantLevels = 0;
 	m_pEntityMngr->Update();
-	m_pRoot = new MyOctant();
+	//m_pEntityMngr->ClearDimensionSetAll();
+	m_pRoot = new MyOctant(m_uOctantLevels, 5);
 }
 void Application::Update(void)
 {
@@ -49,7 +55,7 @@ void Application::Update(void)
 
 	//Add objects to render list
 	m_pEntityMngr->AddEntityToRenderList(-1, true);
-	m_pRoot->Display();
+	m_pRoot->Display(m_uOctantID);
 }
 void Application::Display(void)
 {
